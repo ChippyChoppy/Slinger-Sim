@@ -1,10 +1,12 @@
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
-const width = canvas.width = 320;
-const height = canvas.height = 480;
+const width = canvas.width = 1200;
+const height = canvas.height = 700;
 const gravity = 0.4;
 const mouse = { x: 0, y: 0 };
 const p1 = { x: 0, y: 0 };
+const friction = 0.99
+const oomph = 0.1
 
 let isMouseDown = false;
 
@@ -29,6 +31,31 @@ function Circle(x, y, r, color) {
     this.vel = { x: 0, y: 0 }
 }
 
+function hitTheWall() {
+    circle.vel.x = 0;
+    circle.vel.y = 0;
+    isMouseDown = false;
+}
+
+function push() {
+    if (circle.x - circle.r < 0) {
+        circle.x = circle.r + 3;
+        hitTheWall()
+    }
+    if (circle.x + circle.r > width) {
+        circle.x = width - circle.r - 3;
+       hitTheWall()
+    }
+    if (circle.y - circle.r < 0) {
+        circle.y = circle.r + 3;
+        hitTheWall()
+   }
+    if (circle.y + circle.r > height) {
+        circle.y = height - circle.r - 3;
+        hitTheWall()
+    }
+}
+
 function update() {
     if (circle.x - circle.r < 0 || circle.x + circle.r > width) {
         circle.vel.x *= -1;
@@ -45,11 +72,11 @@ function update() {
         const dir = Math.atan2(dy, dx);
         const d = Math.sqrt(dx * dx + dy * dy);
 
-        circle.vel.x = -Math.cos(dir) * (d * 0.1)
-        circle.vel.y = -Math.sin(dir) * (d * 0.1)
+        circle.vel.x = -Math.cos(dir) * (d * oomph)
+        circle.vel.y = -Math.sin(dir) * (d * oomph)
     } else {
-        circle.vel.x *= 0.99;
-        circle.vel.y *= 0.99;
+        circle.vel.x *= friction;
+        circle.vel.y *= friction;
         circle.vel.y += gravity;
         circle.x += circle.vel.x;
         circle.y += circle.vel.y;
@@ -61,19 +88,23 @@ function render() {
     context.clearRect(0, 0, width, height); //maybe not best prax to clear everytime, but best for simplicity at the moment
     context.beginPath();
     context.lineWidth = 5;
-    context.strokeStyle = "blue";
-    context.fillStyle = circle.color
+    context.strokeStyle = "gray";
+    context.fillStyle = circle.color;
     context.arc(circle.x, circle.y, circle.r, 0, Math.PI * 2);
     context.stroke();
     context.fill();
     context.closePath();
 
     if (isMouseDown) {
-        const dir = Math.atan2(p1.y = mouse.y, p1.x - mouse.x);
+        const dir = Math.atan2(p1.y - mouse.y, p1.x - mouse.x);
         const cos = Math.cos(dir);
         const sin = Math.sin(dir);
-
-        drawLine(p1.x, p1.y, mouse.x, mouse.y)
+        let newX = p1.x + (-sin * circle.r);
+        let newY = p1.y + (cos * circle.r);
+        drawLine(newX, newY, mouse.x, mouse.y)
+        newX = p1.x + (sin * circle.r);
+        newY = p1.y + (-cos * circle.r);
+        drawLine(newX, newY, mouse.x, mouse.y)
     }
 }
 
@@ -87,8 +118,8 @@ canvas.onmousedown = function ({ offsetX, offsetY }) {
     isMouseDown = true;
     p1.x = offsetX;
     p1.y = offsetY;
-    circle.x = offsetX
-    circle.y = offsetY
+    circle.x = offsetX;
+    circle.y = offsetY;
 }
 
 document.onmouseup = function ({ offsetX, offsetY }) {
@@ -103,9 +134,11 @@ canvas.onmousemove = function ({ offsetX, offsetY }) {
     if (isMouseDown) {
         circle.x = offsetX;
         circle.y = offsetY;
+        
+        push();
     }
 }
 
-const circle = new Circle(width / 2, height / 2, 15, "orange")
+const circle = new Circle(width / 2, height / 2, 15, "aqua")
 
 frame();
