@@ -24,6 +24,7 @@ function update() {
 }
 
 function render() {
+    context.clearRect(0,0, width, height); //maybe not best prax to clear everytime, but best for simplicity at the moment
     context.beginPath();
     context.lineWidth = 5;
     context.strokeStyle = "blue";
@@ -32,6 +33,10 @@ function render() {
     context.stroke();
     context.fill();
     context.closePath();
+    
+    // if (isMouseDown) {
+    //     const dir = 
+    // }
 }
 
 function frame() {
