@@ -1,0 +1,11 @@
+html, body {
+    background: magenta
+}
+
+canvas {
+    background: gold;
+    display: block;
+    margin: 0 auto;
+    border: solid 6px greenyellow;
+    border-radius: 10px;
+}
